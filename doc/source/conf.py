@@ -43,8 +43,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'forest'
-copyright = u'2012, Fabien Benureau'
+project = u'scicfg'
+copyright = u'2015, Fabien Benureau'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

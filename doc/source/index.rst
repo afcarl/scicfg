@@ -1,11 +1,11 @@
-:class:`forest.Tree` class
+:class:`scicfg.SciConfig` class
 ==========================
 
-.. automodule:: forest
+.. automodule:: scicfg
 
-The motor classes all inherit from the :class:`Tree` class. The end-user class use multiple inheritance to adapt to the model specificities.
+The motor classes all inherit from the :class:`SciConfig` class. The end-user class use multiple inheritance to adapt to the model specificities.
 
-.. autoclass:: Tree
+.. autoclass:: SciConfig
    :members:
    :undoc-members:
    :member-order: bysource
@@ -18,7 +18,7 @@ The motor classes all inherit from the :class:`Tree` class. The end-user class u
    .. automethod:: _fromkeys
    .. automethod:: _from_file
    .. automethod:: _to_file
-   
+
 
    Creating and modifying branches and leaves
 
@@ -32,7 +32,7 @@ The motor classes all inherit from the :class:`Tree` class. The end-user class u
    Accessing leaves
 
    .. automethod:: _get
-   .. automethod:: _keys 
+   .. automethod:: _keys
    .. automethod:: _values
    .. automethod:: _items
 
@@ -61,4 +61,3 @@ The motor classes all inherit from the :class:`Tree` class. The end-user class u
    .. automethod:: _check_value
    .. automethod:: _check_key
    .. automethod:: _lines
-

@@ -10,7 +10,7 @@ setup(name         = 'scicfg',
       url          = 'github.com/humm/scicfg.git',
       maintainer   = 'Fabien Benureau',
       license      = 'LGPLv3',
-      packages     = ['forest'],
+      packages     = ['scicfg'],
       description  = 'A python hierarchical configuration structure for scientific parameter files',
       classifiers=[
         'Development Status :: 4 - Beta',

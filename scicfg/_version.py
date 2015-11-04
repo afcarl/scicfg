@@ -38,7 +38,7 @@ def get_config():
     cfg.style = "git-describe-long"
     cfg.tag_prefix = ""
     cfg.parentdir_prefix = ""
-    cfg.versionfile_source = "forest/_version.py"
+    cfg.versionfile_source = "scicfg/_version.py"
     cfg.verbose = False
     return cfg
 
