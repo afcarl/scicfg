@@ -2,12 +2,12 @@ from __future__ import print_function, division
 import unittest
 
 import env
-import forest
+import scicfg
 
 class TestFreeze(unittest.TestCase):
 
     def test_freeze(self):
-        tc = forest.Tree()
+        tc = scicfg.SciConfig()
         tc._branch('a')
 
         tc._freeze(True)
@@ -21,7 +21,7 @@ class TestFreeze(unittest.TestCase):
         tc._branch('b')
 
     def test_freeze_struct(self):
-        tc = forest.Tree()
+        tc = scicfg.SciConfig()
         tc._branch('a')
         tc.a.b = 1
 

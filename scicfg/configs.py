@@ -1,5 +1,5 @@
 """
-A tree structure with dynamic attribute interface.
+A config structure with dynamic attribute interface.
 """
 from __future__ import print_function, division
 
@@ -13,14 +13,15 @@ _uid = object()
 _valid_leaf = re.compile("[A-Za-z][_a-zA-Z0-9]*$")
 _valid_key  = re.compile("[A-Za-z][_a-zA-Z0-9]*(\.[A-Za-z][_a-zA-Z0-9]*)*$")
 
-class Tree(object):
+
+class SciConfig(object):
     """
-    A Tree is a set of elements, some of which are other trees.
+    A SciSciConfig is a set of elements, some of which are other configs.
     """
 
-    def __init__(self, tree=None, strict=False):
+    def __init__(self, config=None, strict=False):
         """
-        :param tree: an existing tree or dictionary to copy value from.
+        :param config: an existing config or dictionary to copy value from.
         """
         object.__setattr__(self, '_leaves_', {})
         object.__setattr__(self, '_isinstance_', {})
@@ -32,50 +33,66 @@ class Tree(object):
         object.__setattr__(self, '_freeze_', False)
         object.__setattr__(self, '_freeze_struct_', False)
         object.__setattr__(self, '_strict_', strict)
-        if tree is not None:
-            self._update(tree, overwrite=True)
+        if config is not None:
+            self._update(config, overwrite=True)
 
     def __copy__(self):
-        new_tree = Tree()
-        object.__setattr__(new_tree, '_leaves_', self._leaves_)
-        object.__setattr__(new_tree, '_isinstance_', self._isinstance_)
-        object.__setattr__(new_tree, '_validate_', self._validate_)
-        object.__setattr__(new_tree, '_docstrings_', self._docstrings_)
-        object.__setattr__(new_tree, '_coverage_', self._coverage_)
-        object.__setattr__(new_tree, '_history_', self._history_)
-        object.__setattr__(new_tree, '_branches_', self._branches_)
-        object.__setattr__(new_tree, '_freeze_', self._freeze_)
-        object.__setattr__(new_tree, '_freeze_struct_', self._freeze_struct_)
-        object.__setattr__(new_tree, '_strict_', self._strict_)
-        return new_tree
+        new_config = SciConfig()
+        object.__setattr__(new_config, '_leaves_', copy.copy(self._leaves_))
+        object.__setattr__(new_config, '_branches_', copy.copy(self._branches_))
+        object.__setattr__(new_config, '_isinstance_', self._isinstance_)
+        object.__setattr__(new_config, '_validate_', self._validate_)
+        object.__setattr__(new_config, '_docstrings_', self._docstrings_)
+        object.__setattr__(new_config, '_coverage_', self._coverage_)
+        object.__setattr__(new_config, '_history_', self._history_)
+        object.__setattr__(new_config, '_freeze_', self._freeze_)
+        object.__setattr__(new_config, '_freeze_struct_', self._freeze_struct_)
+        object.__setattr__(new_config, '_strict_', self._strict_)
+        return new_config
 
-    def __deepcopy__(self, memo):
-        new_tree = Tree()
-        memo[id(self)] = new_tree
-        object.__setattr__(new_tree, '_leaves_', copy.deepcopy(self._leaves_, memo))
-        object.__setattr__(new_tree, '_isinstance_', copy.deepcopy(self._isinstance_, memo))
-        object.__setattr__(new_tree, '_validate_', copy.deepcopy(self._validate_, memo))
-        object.__setattr__(new_tree, '_docstrings_', copy.deepcopy(self._docstrings_, memo))
-        object.__setattr__(new_tree, '_coverage_', copy.deepcopy(self._coverage_, memo))
-        object.__setattr__(new_tree, '_history_', copy.deepcopy(self._history_, memo))
-        object.__setattr__(new_tree, '_branches_', copy.deepcopy(self._branches_, memo))
-        object.__setattr__(new_tree, '_freeze_', self._freeze_)
-        object.__setattr__(new_tree, '_freeze_struct_', self._freeze_struct_)
-        object.__setattr__(new_tree, '_strict_', self._strict_)
-        return new_tree
+    def __deepcopy__(self, memo, unfreeze=True, unfreeze_struct=True):
+        new_config = SciConfig()
+        memo[id(self)] = new_config
+        new_branches = {name: branch.__deepcopy__(memo,
+                                                  unfreeze=unfreeze,
+                                                  unfreeze_struct=unfreeze_struct)
+                        for name, branch in self._branches}
+        object.__setattr__(new_config, '_branches_', new_branches)
+        object.__setattr__(new_config, '_leaves_', copy.deepcopy(self._leaves_, memo))
+        object.__setattr__(new_config, '_isinstance_', copy.deepcopy(self._isinstance_, memo))
+        object.__setattr__(new_config, '_validate_', copy.deepcopy(self._validate_, memo))
+        object.__setattr__(new_config, '_docstrings_', copy.deepcopy(self._docstrings_, memo))
+        object.__setattr__(new_config, '_coverage_', copy.deepcopy(self._coverage_, memo))
+        object.__setattr__(new_config, '_history_', copy.deepcopy(self._history_, memo))
+        object.__setattr__(new_config, '_freeze_', False if unfreeze else self._freeze_)
+        object.__setattr__(new_config, '_freeze_struct_',  False if unfreeze_struct else self._freeze_struct_)
+        object.__setattr__(new_config, '_strict_', self._strict_)
+        return new_config
 
-    def _copy(self, deep=False):
+    def _copy(self):
         """\
         Convenience copy method.
-
-        :param deep:  if True, perform a deep copy
         """
-        if deep:
-            return self.__deepcopy__({})
         return self.__copy__()
 
-    def _deepcopy(self):
-        return self._copy(deep=True)
+    def _deepcopy(self, unfreeze=True, unfreeze_struct=True):
+        """\
+        Convenience deepcopy method.
+
+        :param unfreeze:  if True, the copied configuration is unfrozen (includes the structure)
+        :param unfreeze_struct:  if True, the copied configuration structure is unfrozen
+        """
+        return self.__deepcopy__({}, unfreeze=unfreeze, unfreeze_struct=unfreeze_struct)
+
+    @classmethod
+    def _fromkeys(cls, keys, value=None):
+        """\
+        Creates a SciConfig instance with keys from keys and values set to value.
+        """
+        t = cls()
+        for key in keys:
+            t[key] = value
+        return t
 
     @classmethod
     def _from_file(cls, filename):
@@ -98,6 +115,15 @@ class Tree(object):
         with open(filename, 'w') as f:
             f.write('\n'.join(line for line in self._lines()))
 
+    @property
+    def _branches(self):
+        return self._branches_.items()
+
+    @property
+    def _leaves(self):
+        return self._leaves_.items()
+
+
     def _coverage(self, key):
         """Return the number of time the value of the key was accessed."""
         path = key.split('.', 1)
@@ -116,21 +142,21 @@ class Tree(object):
 
     def _branch(self, name, value=None, overwrite=False, nested=True, strict=None):
         """\
-        Create a new branch in the tree if it does not already exists.
+        Create a new branch in the config if it does not already exists.
         Can create nested branches.
 
         :param name:      the name of the branch
-        :param value:     optionally, an existing `Tree` instance instead of creating
-                          a new empty `Tree`.
+        :param value:     optionally, an existing `SciConfig` instance instead of creating
+                          a new empty `SciConfig`.
         :param nested:    if True, create intermediate branchs as needed.
                           Note that if override is True, existing intermediate branchs
                           will not be recreated.
         :raise KeyError:  if leaf already exists with this name
         """
         if self._freeze_:
-            raise ValueError("Can't add a branch to a frozen tree")
+            raise ValueError("Can't add a branch to a frozen config")
         if self._freeze_struct_:
-            raise ValueError("Can't add a branch to a tree whose structure is frozen")
+            raise ValueError("Can't add a branch to a config whose structure is frozen")
         self._check_key(name)
         path = name.split('.', 1)
 
@@ -152,7 +178,7 @@ class Tree(object):
                 else:
                     if strict is None:
                         strict = self._strict_
-                    self._branches_[path[0]] = Tree(strict=strict)
+                    self._branches_[path[0]] = SciConfig(strict=strict)
         if len(path) == 2:
             self._branches_[path[0]]._branch(path[1], value=value, overwrite=overwrite, nested=nested)
 
@@ -221,12 +247,12 @@ class Tree(object):
 
     def _check_value(self, key, value):
         """Check a value against defined instance and custom checks
-        if the tree is strict, then a check must be defined
+        if the config is strict, then a check must be defined
         """
         check_exists = False
-        if isinstance(value, Tree):
+        if isinstance(value, SciConfig):
             if self._strict_ and key not in self._branches_:
-                raise TypeError("can't create a branch {} implicitely in a strict tree".format(key))
+                raise TypeError("can't create a branch {} implicitely in a strict config".format(key))
         else:
             if key in self._isinstance_:
                 if self._isinstance_[key] is not None:
@@ -246,25 +272,25 @@ class Tree(object):
                         raise TypeError(("value for leaf {} did not pass user-defined "
                                          "validating function").format(key)) # TODO correct relative path error
             if self._strict_ and not check_exists: # FIXME: is this the correct place to do this
-                raise TypeError(("can't create new leaf '{}' in a strict tree without a "
+                raise TypeError(("can't create new leaf '{}' in a strict config without a "
                                  "type or validation function declared.").format(key)) # TODO correct relative path error
 
-    def _check(self, tree=None, struct=False):
-        """Check conformity with another tree type checks and validate functions
+    def _check(self, config=None, struct=False):
+        """Check conformity with another config type checks and validate functions
 
-        :param struct:      if True, verifies that both tree have the same branches
+        :param struct:      if True, verifies that both config have the same branches
         :raises TypeError:  if check fails
         """
-        if tree is None:
-            tree = self
+        if config is None:
+            config = self
         for key, leaf in self._leaves_.items():
-            tree._check_value(key, leaf)
-        if struct and set(self._branches_.keys()) != set(tree._branches_.keys()):
-            diff = set(self._branches_.keys()).symmetric_difference(set(tree._branches_.keys()))
-            raise TypeError('({}) branches are not present in both trees'.format(diff)) # TODO: 2 differences instead of symmetric
+            config._check_value(key, leaf)
+        if struct and set(self._branches_.keys()) != set(config._branches_.keys()):
+            diff = set(self._branches_.keys()).symmetric_difference(set(config._branches_.keys()))
+            raise TypeError('({}) branches are not present in both configs'.format(diff)) # TODO: 2 differences instead of symmetric
         for key, branch in self._branches_.items():
-            if key in tree._branches_:
-                branch._check(tree._branches_[key], struct=struct)
+            if key in config._branches_:
+                branch._check(config._branches_[key], struct=struct)
 
     @staticmethod
     def _check_key(key, leaf=False):
@@ -285,15 +311,13 @@ class Tree(object):
             raise ValueError(("leaf not a valid attribute name, '{}'"
                               " was provided").format(key))
 
+    # get, set, pop and variants
+
     def _get(self, key, default):
         try:
             return self.__getitem__(key)
         except KeyError:
             return default
-
-    def _setdefault(self, key, value):
-        if key not in self:
-            self[key] = value
 
     def __getattr__(self, key):
         try:
@@ -314,19 +338,23 @@ class Tree(object):
         else:
             return self._branches_[path[0]].__getitem__(path[1])
 
+    def _setdefault(self, key, value):
+        if key not in self:
+            self[key] = value
+
     def __setattr__(self, key, value):
         """
-        Set a new item in the tree.
+        Set a new item in the config.
 
         :param key:  must be a string, and can't start with an underscore.
         """
         if self._freeze_:
-            raise ValueError("Can't modify a frozen tree")
+            raise ValueError("Can't modify a frozen config")
         self._check_key(key, leaf=True)
         if self._freeze_struct_ and key not in self._leaves_ and key not in self._branches_:
-            raise ValueError("Can't modify the frozen structure of the tree")
+            raise ValueError("Can't modify the frozen structure of the config")
         self._check_value(key, value)
-        if isinstance(value, Tree):
+        if isinstance(value, SciConfig):
             if key in self._leaves_:
                 raise ValueError('branch cannot be added: a leaf already '
                                  'exists with name {}'.format(key))
@@ -342,7 +370,7 @@ class Tree(object):
 
     def __setitem__(self, key, value):
         if self._freeze_:
-            raise ValueError("Can't modify a frozen tree")
+            raise ValueError("Can't modify a frozen config")
         self._check_key(key)
         path = key.split('.', 1)
 
@@ -372,9 +400,9 @@ class Tree(object):
 
     def _popitem(self):
         """\
-        Remove and return a tuple (key, value) from the tree.
+        Remove and return a tuple (key, value) from the config.
 
-        :raise KeyError:  when tree is empty.
+        :raise KeyError:  when config is empty.
 
         ..note:: direct leaves will always be popped first.
         """
@@ -388,26 +416,10 @@ class Tree(object):
                     return ('{}.{}'.format(branchname, k), v)
                 except KeyError:
                     pass
-        raise KeyError('tree is empty')
-
-    def _rename(self, old_key, new_key):
-        if new_key in self:
-            raise KeyError('"{}" already in the tree. Use force=True to override'.format(new_key))
-        value = self._pop(new_key)
-        self[new_key] = value # TODO: make more robust
-
-    @classmethod
-    def _fromkeys(cls, keys, value=None):
-        """\
-        Creates a new dictionary with keys from seq and values set to value.
-        """
-        t = cls()
-        for key in keys:
-            t[key] = value
-        return t
+        raise KeyError('config is empty')
 
     def _clear(self, struct=True, typecheck=False):
-        """Remove all leaves and branch from the tree.
+        """Remove all leaves and branch from the config.
 
         :param struct:    if False, does not remove the branches.
         :param typecheck: if True, does remove the typecheck of the leaves.
@@ -424,7 +436,13 @@ class Tree(object):
             self._isinstance_.clear()
             self._validate.clear()
 
-    # pop, popitem,
+
+    def _rename(self, old_key, new_key):
+        if new_key in self:
+            raise KeyError('"{}" already in the config. Use force=True to override'.format(new_key))
+        value = self._pop(new_key)
+        self[new_key] = value # TODO: make more robust
+
 
     def __len__(self):
         """Return the number of direct branchs and leaves""" #FIXME is that what we expect ?
@@ -456,15 +474,15 @@ class Tree(object):
         except KeyError:
             del self._branches_[key]
 
-    def __eq__(self, tree):
-        return (self._leaves_ == tree._leaves_
-                and self._branches_ == tree._branches_)
+    def __eq__(self, config):
+        return (self._leaves_ == config._leaves_
+                and self._branches_ == config._branches_)
 
     def _freeze(self, freeze, recursive=True):
         """\
-        Freeze and unfreeze the tree.
+        Freeze and unfreeze the config.
 
-        We a tree is frozen, attributes can't be modified, created or deleted.
+        We a config is frozen, attributes can't be modified, created or deleted.
         :param freeze:     True for freezing, False for unfreezing
         :param recursive:  to apply the change on branches as well.
         """
@@ -477,7 +495,7 @@ class Tree(object):
         """\
         Freeze and unfreeze the branches.
 
-        We a tree is frozen, branches can't be modified, created or deleted.
+        We a config is frozen, branches can't be modified, created or deleted.
         :param freeze:     True for freezing, False for unfreezing
         :param recursive:  to apply the change on subbranches as well.
         """
@@ -488,10 +506,10 @@ class Tree(object):
 
     def _strict(self, strict=True, recursive=True):
         """\
-        Make a tree strict or not.
+        Make a config strict or not.
 
-        In a strict tree, attributes cannot be created unless they have been
-        described using the method `_describe()`. When the tree is made strict,
+        In a strict config, attributes cannot be created unless they have been
+        described using the method `_describe()`. When the config is made strict,
         existing leaves will be checked, and TypeError will be raised if not
         all are described.
         :param freeze:     True for strict, False for unstrict
@@ -526,39 +544,39 @@ class Tree(object):
         return described
 
 
-    def _update(self, tree, overwrite=True, descriptions=True, described_only=False):
+    def _update(self, config, overwrite=True, descriptions=True, described_only=False):
         """\
-        Update the tree with values of another tree. If the other tree possess
+        Update the config with values of another config. If the other config possess
         branches not present in this one (and structure is not frozen), those
         branches will be created as well.
 
-        :param overwrite:      if False, value already present in the tree will not
+        :param overwrite:      if False, value already present in the config will not
                                be modified (default True).
         :param descriptions:   if True, copy the descriptions as well
         :param described_only: if True, only update leaves that are described in self,
                                or, if `description` is True, descriptions coming from
-                               tree, as long a they don't necessitate new branches in
+                               config, as long a they don't necessitate new branches in
                                self (cheap way to avoid nasty loops).
 
-        ..raise:: TypeError if the tree is frozen and an assignement is needed,
-                  or the structure is frozen and an element of the other tree
+        ..raise:: TypeError if the config is frozen and an assignement is needed,
+                  or the structure is frozen and an element of the other config
                   is not present on this one. Branches will generate TypeError
                   based on their own frozen status, so it is possible to update
-                  a frozen tree if assignement happen on an unfrozen branch.
+                  a frozen config if assignement happen on an unfrozen branch.
         """
-        if isinstance(tree, Tree):
+        if isinstance(config, SciConfig):
             if descriptions:
-                for key, value in tree._isinstance_.items():
+                for key, value in config._isinstance_.items():
                     if overwrite or key not in self._isinstance_:
                         self._isinstance_[key] = value
-                for key, value in tree._validate_.items():
+                for key, value in config._validate_.items():
                     if overwrite or key not in self._validate_:
                         self._validate_[key] = value
-                for key, value in tree._docstrings_.items():
+                for key, value in config._docstrings_.items():
                     if overwrite or key not in self._docstrings_:
                         self._docstrings_[key] = value
 
-            for key, value in tree._leaves_.items():
+            for key, value in config._leaves_.items():
                 if not described_only or (described_only and self._described(key)):
                     if key in self._leaves_:
                         if overwrite:
@@ -566,7 +584,7 @@ class Tree(object):
                     else:
                         self.__setattr__(key, value)
 
-            for branchname, branch in tree._branches_.items():
+            for branchname, branch in config._branches_.items():
                 if branchname not in self._branches_:
                     if not described_only:
                         self._branch(branchname)
@@ -579,11 +597,11 @@ class Tree(object):
             if described_only:
                 raise NotImplementedError
             if not overwrite:
-                for key, value in tree.items():
+                for key, value in config.items():
                     if not key in self:
                         self[key] = value
             else:
-                for key, value in tree.items():
+                for key, value in config.items():
                     self[key] = value
 
     def _lines(self):
@@ -616,6 +634,23 @@ class Tree(object):
         for branchname, branch in self._branches_.items():
             for key, value in branch._items():
                 yield ('{}.{}'.format(branchname, key), value)
+
+    def _walk(self, topdown=True):
+        """Same semantics as the os.walk function"""
+        return self._walk_aux(topdown=topdown)
+
+    def _walk_aux(self, topdown=True, path=''):
+        branchnames = self._branches_.keys()
+        leavesnames = self._leaves_.keys()
+        if topdown:
+            yield (path, branchnames, leavesnames)
+        for branchname, branch in self._branches_.items():
+            relpath = path + ('.' if path != '' else '') + branchname
+            for e in branch._walk_aux(topdown=topdown, path=relpath):
+                yield e
+        if not topdown:
+            yield (path, branchnames, leavesnames)
+
 
     def _children_keys(self):
         """Return only the immediate children names (branches and leaves)"""

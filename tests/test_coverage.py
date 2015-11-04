@@ -2,12 +2,12 @@ from __future__ import print_function, division
 import unittest
 
 import env
-import forest
+import scicfg
 
 class TestCoverage(unittest.TestCase):
 
     def test_coverage(self):
-        tc = forest.Tree()
+        tc = scicfg.SciConfig()
         tc._branch('a')
         with self.assertRaises(KeyError):
             tc._coverage('a.b')
@@ -17,7 +17,7 @@ class TestCoverage(unittest.TestCase):
         self.assertEqual(tc._coverage('a.b'), 1)
 
     def test_history(self):
-        tc = forest.Tree()
+        tc = scicfg.SciConfig()
         tc._branch('a')
         with self.assertRaises(KeyError):
             tc._history('a.b')

@@ -3,7 +3,7 @@ import unittest
 import pickle
 
 import env
-import forest
+import scicfg
 
 import os
 import tempfile
@@ -17,7 +17,7 @@ def tempname():
 class TestFiles(unittest.TestCase):
 
     def test_lines(self):
-        tc = forest.Tree()
+        tc = scicfg.SciConfig()
         tc._branch('a')
         tc.a.b = 1
         tc.a.d = [1, 2, 3]
@@ -25,7 +25,7 @@ class TestFiles(unittest.TestCase):
         self.assertTrue(tc.__str__() in ['a.b=1\na.d=[1, 2, 3]', 'a.d=[1, 2, 3]\na.b=1'])
 
     def test_save(self):
-        tc = forest.Tree()
+        tc = scicfg.SciConfig()
         tc._branch('a')
         tc.a.b = '1'
         tc.a.d = [1, 2, 3]
@@ -44,29 +44,29 @@ class TestFiles(unittest.TestCase):
         filename = tempname()
         with open(filename, 'w') as f:
             s = f.write('a.b=1\na.d=[1, 2, 3]')
-        tc = forest.Tree._from_file(filename)
+        tc = scicfg.SciConfig._from_file(filename)
 
         self.assertTrue(tc.__str__() in ['a.b=1\na.d=[1, 2, 3]', 'a.d=[1, 2, 3]\na.b=1'])
 
         os.unlink(filename)
 
     def test_both(self):
-        tc = forest.Tree()
+        tc = scicfg.SciConfig()
         tc._branch('a')
         tc.a.b = 1
         tc.a.d = [1, 2, 3]
 
         filename = tempname()
         tc._to_file(filename)
-        t2 = forest.Tree._from_file(filename)
+        t2 = scicfg.SciConfig._from_file(filename)
 
         self.assertEqual(tc, t2)
 
 class TestPickle(unittest.TestCase):
 
     def test_pickle(self):
-        t = forest.Tree()
-        t.a = forest.Tree()
+        t = scicfg.SciConfig()
+        t.a = scicfg.SciConfig()
         t.a.b = 1
         t.a.c = '2'
         t.a._branch('efg')

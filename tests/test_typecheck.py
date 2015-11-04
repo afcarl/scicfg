@@ -3,12 +3,12 @@ import unittest
 import collections
 
 import env
-import forest
+import scicfg
 
 class TestTypeCheck(unittest.TestCase):
 
     def test_instance(self):
-        tc = forest.Tree()
+        tc = scicfg.SciConfig()
         tc._branch('a')
         tc.a._isinstance('b', int)
         tc.a.b = 1
@@ -23,7 +23,7 @@ class TestTypeCheck(unittest.TestCase):
             tc.a.b = 1.0
 
     def test_subinstance(self):
-        tc = forest.Tree()
+        tc = scicfg.SciConfig()
         tc._branch('a')
         tc._isinstance('a.b', int)
         tc.a.b = 1
@@ -38,7 +38,7 @@ class TestTypeCheck(unittest.TestCase):
             tc.a.b = 1.0
 
     def test_docstring(self):
-        tc = forest.Tree()
+        tc = scicfg.SciConfig()
         tc._branch('a')
         tc._docstring('a.b', 'a nice descriptive docstring')
         tc._docstring('a.c', """Another one""")
@@ -48,7 +48,7 @@ class TestTypeCheck(unittest.TestCase):
         self.assertEqual(tc._docstring('a.f'), None)
 
     def test_describe(self):
-        tc = forest.Tree()
+        tc = scicfg.SciConfig()
         tc._branch('a')
         tc._describe('a.b', 'a nice descriptive docstring', int)
         tc._describe('c.b', 'can describe things on non existing branches', int)
@@ -72,7 +72,7 @@ class TestTypeCheck(unittest.TestCase):
             tc.a.c = -50.0
 
     def test_validate(self):
-        tc = forest.Tree()
+        tc = scicfg.SciConfig()
         tc._branch('a')
 
         def validate_b(value):
@@ -95,7 +95,7 @@ class TestTypeCheck(unittest.TestCase):
             tc.a.c = -1
 
     def test_subvalidate(self):
-        tc = forest.Tree()
+        tc = scicfg.SciConfig()
         tc._branch('a')
 
         def validate_b(value):
@@ -119,14 +119,14 @@ class TestTypeCheck(unittest.TestCase):
 
 
     def test_check_tree(self):
-        tc = forest.Tree()
+        tc = scicfg.SciConfig()
         tc._branch('a')
         tc.a._isinstance('c', (int, float))
         def validate_b(value):
             return 0 <= value <= 256
         tc.a._validate('b', validate_b)
 
-        t2 = forest.Tree()
+        t2 = scicfg.SciConfig()
         t2._branch('a')
         t2.a.c = 2.0
         t2.a.b = 50
@@ -152,10 +152,10 @@ class TestTypeCheck(unittest.TestCase):
 
 
     def test_check_struct(self):
-        tc = forest.Tree()
+        tc = scicfg.SciConfig()
         tc._branch('a')
 
-        t2 = forest.Tree()
+        t2 = scicfg.SciConfig()
         t2._branch('a')
         t2._check(tc, struct=True)
 
@@ -166,7 +166,7 @@ class TestTypeCheck(unittest.TestCase):
             tc._check(t2, struct=True)
 
     def test_check_struct(self):
-        t = forest.Tree()
+        t = scicfg.SciConfig()
         t._strict()
 
         t._isinstance('a', int)
@@ -180,13 +180,13 @@ class TestTypeCheck(unittest.TestCase):
         t.b = 1
 
     def test_collision(self):
-        t = forest.Tree()
+        t = scicfg.SciConfig()
         t._isinstance('a', int)
         with self.assertRaises(ValueError):
             t._isinstance('a.b', int)
 
     def test_unset(self):
-        t = forest.Tree()
+        t = scicfg.SciConfig()
 
         t._isinstance('f', int)
         self.assertEqual(t._unset(), set(('f')))
@@ -208,9 +208,9 @@ class TestTypeCheck(unittest.TestCase):
         self.assertEqual(t._unset(), set(('a.e.c', 'c.b')))
 
     def test_update(self):
-        t = forest.Tree()
+        t = scicfg.SciConfig()
         t._isinstance('f', int)
-        t2 = forest.Tree(strict=True)
+        t2 = scicfg.SciConfig(strict=True)
         with self.assertRaises(TypeError):
             t2.f = 2
         t2._update(t, descriptions=False)
@@ -220,7 +220,7 @@ class TestTypeCheck(unittest.TestCase):
         t2.f = 2
 
     def test_describe2(self):
-        defcfg = forest.Tree()
+        defcfg = scicfg.SciConfig()
         defcfg._describe('m_channels', instanceof=collections.Iterable,
                          docstring='Motor channels to generate random order of')
         defcfg._describe('s_channels', instanceof=collections.Iterable,
