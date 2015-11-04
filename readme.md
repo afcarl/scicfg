@@ -1,11 +1,11 @@
-# forest
+# scicfg
 
-`forest` is a python hierarchical configuration structure designed for scientific experiments.
+`scicfg` is a python hierarchical configuration structure designed for scientific experiments.
 
 ```python
-import forest
+import scicfg
 
-t = forest.Tree()
+t = scicfg.SciConfig()
 t.temperature = 10
 t._branch('experiment1')
 t.experiment1.duration = 3600.0
@@ -13,20 +13,20 @@ t.experiment1.duration = 3600.0
 
 ### Status
 
-`forest` is considered beta at this point. It has a rich collection of unitary tests, but it has not been used enough in practical situations to be considered stable or mature.
+`scicfg` is considered beta at this point. It has a rich collection of unitary tests, but it has not been used enough in practical situations to be considered stable or mature.
 
 ### Design
 
-`forest` has been designed to be easy to use while ensuring data integrity. It features many ways to protect the tree data incorrect inputs. It also features coverage and history logging, enabling the ability to check that the data structure was correctly used during an experiment. Because the main goal of the authors of the library was to ensure that their scientific experiments were correct, some of the design choices led to an characteristically unpythonic API.
+`scicfg` has been designed to be easy to use while ensuring data integrity. It features many ways to protect the tree data incorrect inputs. It also features coverage and history logging, enabling the ability to check that the data structure was correctly used during an experiment. Because the main goal of the authors of the library was to ensure that their scientific experiments were correct, some of the design choices led to an characteristically unpythonic API.
 
-#### Tree branches have to be explicitely declared
+#### SciConfig branches have to be explicitely declared
 
 Is applies only if you use the attribute interface. You can implicitly declare branch using the dict interface.
 
 ```python
-import forest
+import scicfg
 
-t = forest.Tree()
+t = scicfg.SciConfig()
 t.temperature = 10
 t._branch('experiment1')
 t.experiment1.duration = 3600.0     # attribute interface
@@ -40,19 +40,20 @@ Branches and leaves names cannot start with an underscore. Inversely, all public
 
 #### Not a dict
 
-`Tree` is not inherited from `dict`. It offers most of the dict methods, but is not a drop-in replacement: method are all prefixed with an underscore : (`_update()`, `_get()`, `_setdefault()`, `_items()` etc), and their behavior are designed to be consistent with the hiearchical data structure, not the `dict` interface.
+`SciConfig` is not inherited from `dict`. It offers most of the dict methods, but is not a drop-in replacement: method are all prefixed with an underscore : (`_update()`, `_get()`, `_setdefault()`, `_items()` etc), and their behavior are designed to be consistent with the hiearchical data structure, not the `dict` interface.
 
 #### Not a lean data structure
 
-The datastructure is geared toward preventing and detecting misuse. That creates overhead that makes `Tree` ill fitted for intensive applications.
+The datastructure is geared toward preventing and detecting misuse. That creates overhead that makes `SciConfig` ill fitted for intensive applications.
 
 #### Values can optionally be validated when they are set
 
 They can be validated either by their type:
 
 ```python
-t._isinstance('temperature', int)
-t.temperature = 10    # isinstance(10, int) is run
+import numbers
+t._isinstance('temperature', numbers.Real)
+t.temperature = 10.0  # isinstance(10, numbers.Real) is run
 t.temperature = "25"  # raises TypeError
 ```
 
