@@ -2,7 +2,7 @@ from setuptools import setup
 
 import versioneer
 
-VERSION = '1.0.0'
+VERSION = '1.0.1'
 
 setup(name         = 'scicfg',
       version      = VERSION,
@@ -10,7 +10,7 @@ setup(name         = 'scicfg',
       author       = 'Fabien Benureau',
       author_email = 'fabien.benureau+scicfg@gmail.com',
       url          = 'https://github.com/humm/scicfg',
-      dowload_url  = 'https://github.com/humm/scicfg/tarball/{}'.format(VERSION),
+      download_url = 'https://github.com/humm/scicfg/tarball/{}'.format(VERSION),
       maintainer   = 'Fabien Benureau',
       license      = 'LGPLv3',
       packages     = ['scicfg'],
