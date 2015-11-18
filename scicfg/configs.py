@@ -164,13 +164,13 @@ class SciConfig(object):
             raise ValueError("Can't created non-existent intermediary branches with nested = False")
         if path[0] in self._leaves_:
             if len(path) == 1:
-                raise ValueError("Can't create a branch named '{}': a leaf "
+                raise ValueError("Can't create a branch named `{}`: a leaf "
                                  "with that name already exists.".format(path[0]))
         elif (path[0] in self._docstrings_ or
               path[0] in self._validate_ or
               path[0] in self._isinstance_):
-            raise ValueError("Can't create a branch named '{}': a leaf "
-                                 "with that name is already described.".format(path[0]))
+            raise ValueError("Can't create a branch named `{}`: a leaf "
+                             "with that name is already described.".format(path[0]))
         else:
             if path[0] not in self._branches_.keys():
                 if len(path) == 1 and value is not None:
@@ -357,12 +357,12 @@ class SciConfig(object):
         if isinstance(value, SciConfig):
             if key in self._leaves_:
                 raise ValueError('branch cannot be added: a leaf already '
-                                 'exists with name {}'.format(key))
+                                 'exists with name `{}`'.format(key))
             self._branches_[key] = value
         else:
             if key in self._branches_:
                 raise ValueError('leaf cannot be added: a branch already '
-                                 'exists with name {}'.format(key))
+                                 'exists with name `{}`'.format(key))
             self._history_.setdefault(key, [])
             self._history_[key].append(value)
             self._coverage_[key] = self._coverage_.get(key, 0)
