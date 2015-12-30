@@ -21,5 +21,6 @@ setup(name         = 'scicfg',
         'Programming Language :: Python :: 2.7',
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
-      ]
+      ],
+      install_requires=['six'],
      )
