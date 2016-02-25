@@ -2,7 +2,7 @@ from __future__ import print_function, division
 import unittest
 import collections
 
-import env
+import dotdot
 import scicfg
 
 class TestTypeCheck(unittest.TestCase):
@@ -165,7 +165,7 @@ class TestTypeCheck(unittest.TestCase):
         with self.assertRaises(TypeError):
             tc._check(t2, struct=True)
 
-    def test_check_struct(self):
+    def test_check_struct2(self):
         t = scicfg.SciConfig()
         t._strict()
 

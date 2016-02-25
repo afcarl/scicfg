@@ -2,17 +2,18 @@ from __future__ import print_function, division
 import unittest
 import pickle
 
-import env
+import dotdot
 import scicfg
 
 import os
 import tempfile
-from contextlib import contextmanager
+
 
 def tempname():
     temp = tempfile.NamedTemporaryFile(delete=False)
     temp.close()
     return temp.name
+
 
 class TestFiles(unittest.TestCase):
 
@@ -36,14 +37,13 @@ class TestFiles(unittest.TestCase):
         with open(filename, 'r') as f:
             s = f.read()
 
-        print(s)
         self.assertTrue(s in ["a.b='1'\na.d=[1, 2, 3]", "a.d=[1, 2, 3]\na.b='1'"])
         os.unlink(filename)
 
     def test_load(self):
         filename = tempname()
         with open(filename, 'w') as f:
-            s = f.write('a.b=1\na.d=[1, 2, 3]')
+            f.write('a.b=1\na.d=[1, 2, 3]')
         tc = scicfg.SciConfig._from_file(filename)
 
         self.assertTrue(tc.__str__() in ['a.b=1\na.d=[1, 2, 3]', 'a.d=[1, 2, 3]\na.b=1'])

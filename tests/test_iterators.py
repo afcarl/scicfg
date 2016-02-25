@@ -1,9 +1,8 @@
 from __future__ import print_function, division
 import unittest
 import collections
-import types
 
-import env
+import dotdot
 import scicfg
 
 
@@ -24,7 +23,7 @@ class TestIterators(unittest.TestCase):
     def listit(cls, a):
         #print(a.__class__)
         if isinstance(a, collections.Iterable) and not isinstance(a, str):
-            return [cls.listit(e) for e in a]
+            return sorted([cls.listit(e) for e in a])
         return a
 
     def test_walk(self):
@@ -33,7 +32,7 @@ class TestIterators(unittest.TestCase):
         cfg['a.b.d'] = 2
         cfg['a.e']   = 3
 
-        self.assertEqual(self.listit(cfg._walk()), [['', ['a'], []], ['a', ['b'], ['e']], ['a.b', [], ['d', 'c']]])
+        self.assertEqual(self.listit(cfg._walk()), [[[], ['a'], ''], [[], ['c', 'd'], 'a.b'], [['b'], ['e'], 'a']])
 
 if __name__ == '__main__':
     unittest.main()

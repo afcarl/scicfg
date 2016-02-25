@@ -1,7 +1,7 @@
 from __future__ import print_function, division
 import unittest
 
-import env
+import dotdot
 import scicfg
 
 class TestCreate(unittest.TestCase):

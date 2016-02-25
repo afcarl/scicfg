@@ -3,9 +3,9 @@ A config structure with dynamic attribute interface.
 """
 from __future__ import print_function, division
 
-import collections
 import copy
 import re
+
 
 # a unique object
 _uid = object()
